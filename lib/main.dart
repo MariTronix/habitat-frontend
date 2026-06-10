@@ -1,51 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'theme/app_colors.dart';
-import 'routes/app_router.dart';
-import 'services/api_service.dart'; // Importação essencial
+import 'services/api_service.dart';
+import 'src/app_router.dart';
+import 'src/app_theme.dart';
+import 'src/providers.dart';
 
 void main() {
+  final apiService = ApiService();
+  final authProvider = AuthProvider(apiService: apiService);
+
   runApp(
-    // MultiProvider centralizando os serviços que o app usa
     MultiProvider(
       providers: [
-        // Aqui incluímos o ApiService de verdade
-        Provider<ApiService>(
-          create: (_) => ApiService(),
-        ),
+        Provider<ApiService>.value(value: apiService),
+        ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
+        ChangeNotifierProvider<CasesProvider>(create: (_) => CasesProvider()),
       ],
-      child: const HabitatApp(),
+      child: HabitatApp(authProvider: authProvider),
     ),
   );
 }
 
 class HabitatApp extends StatelessWidget {
-  const HabitatApp({super.key});
+  final AuthProvider authProvider;
+
+  const HabitatApp({super.key, required this.authProvider});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Habitat',
       debugShowCheckedModeBanner: false,
-      
-      // Configurações do go_router
-      routerConfig: AppRouter.router,
-      
-      // Tema definido
-      theme: ThemeData(
-        textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
-        scaffoldBackgroundColor: AppColors.background,
-        primaryColor: AppColors.primary,
-        colorScheme: ColorScheme.light(
-          primary: AppColors.primary,
-          secondary: AppColors.secondary,
-          surface: AppColors.card,
-          error: AppColors.destructive,
-          onPrimary: AppColors.primaryForeground,
-          onSurface: AppColors.foreground,
-        ),
-      ),
+      routerConfig: createRouter(authProvider),
+      theme: HabitatTheme.light,
     );
   }
 }
