@@ -17,14 +17,15 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _showPassword = false;
   bool _isLoggingIn = false;
 
-  Future<void> _handleSubmit(BuildContext context) async {
+  Future<void> _handleSubmit() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       _showMessage('Preencha e-mail e senha.');
       return;
     }
     setState(() => _isLoggingIn = true);
     final auth = context.read<AuthProvider>();
-    final success = auth.login(_emailController.text.trim(), _passwordController.text.trim());
+    final success = await auth.login(_emailController.text.trim(), _passwordController.text.trim());
+    if (!mounted) return;
     setState(() => _isLoggingIn = false);
     if (success) {
       GoRouter.of(context).go('/dashboard');
@@ -87,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton(
-                        onPressed: _isLoggingIn ? null : () => _handleSubmit(context),
+                        onPressed: _isLoggingIn ? null : _handleSubmit,
                         child: _isLoggingIn
                             ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                             : const Text('Entrar'),
