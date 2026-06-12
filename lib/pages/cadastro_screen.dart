@@ -77,17 +77,19 @@ class _CadastroScreenState extends State<CadastroScreen> {
       final api = Provider.of<ApiService>(context, listen: false);
 
       final Map<String, dynamic> body = {
-        'nome': _nomeController.text,
+        'name': _nomeController.text,
         'cpf': _cpfController.text.replaceAll(RegExp(r'\D'), ''),
-        'telefone': _telefoneController.text.replaceAll(RegExp(r'\D'), ''),
-        'endereco': _enderecoController.text,
-        'descricao': _descricaoController.text,
-        'tipo': _tipoAtendimento,
-        'estagiarioId': _estagiarioId,
-        'coordenadorId': _coordenadorId,
+        'phone': _telefoneController.text,
+        'address': _enderecoController.text,
+        'caseReport': _descricaoController.text,
+        'legalGuidance': '',
+        'attendanceStatus': 'triagem',
+        'attendanceType': _tipoAtendimento,
+        'internId': int.tryParse(_estagiarioId ?? ''),
+        'coordinatorId': int.tryParse(_coordenadorId ?? ''),
       };
 
-      final response = await api.post('/atendimentos', body);
+      final response = await api.post('/associates', body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (!mounted) return;

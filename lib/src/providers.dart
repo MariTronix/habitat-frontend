@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 import 'models.dart';
 import 'mock_data.dart';
 
 class AuthProvider extends ChangeNotifier {
+  AuthProvider({ApiService? apiService}) : _apiService = apiService;
+
+  final ApiService? _apiService;
   User? _user;
   User? get user => _user;
   bool get isAuthenticated => _user != null;
@@ -10,7 +14,32 @@ class AuthProvider extends ChangeNotifier {
 
   List<User> get users => List.unmodifiable(_users);
 
-  bool login(String email, String password) {
+  Future<bool> login(String email, String password) async {
+    if (_apiService != null) {
+      try {
+        final data = await _apiService.login(email, password);
+        final remoteUser = data['user'];
+        if (remoteUser is Map<String, dynamic>) {
+          _user = _userFromApi(remoteUser);
+          _upsertUser(_user!);
+          await loadUsersFromApi();
+          notifyListeners();
+          return true;
+        }
+      } on ApiException catch (error) {
+        print('❌ ERRO NA API: ${error.statusCode} - ${error.message}');
+        if (error.statusCode == 401 || error.statusCode == 403) {
+          return false;
+        }
+        rethrow;
+      } catch (e, stackTrace) {
+        print('❌ ERRO INESPERADO: $e');
+        print('Stack: $stackTrace');
+        rethrow;
+      }
+    }
+
+    print('⚠️ ApiService não está injetado, usando fallback mock');
     final match = _users.where((user) => user.email == email && user.senha == password && user.ativo).toList();
     if (match.isEmpty) return false;
     _user = match.first;
@@ -18,8 +47,32 @@ class AuthProvider extends ChangeNotifier {
     return true;
   }
 
+  Future<void> loadUsersFromApi() async {
+    if (_apiService == null) {
+      print('⚠️ ApiService não está injetado para loadUsersFromApi');
+      return;
+    }
+    try {
+      print('📡 Carregando usuários da API...');
+      final usersData = await _apiService.fetchUsers();
+      print('✅ Usuários carregados: ${usersData.length}');
+      _users.clear();
+      for (final userData in usersData) {
+        if (userData is Map<String, dynamic>) {
+          final user = _userFromApi(userData);
+          _upsertUser(user);
+        }
+      }
+      notifyListeners();
+    } catch (e, stackTrace) {
+      print('❌ ERRO AO CARREGAR USUÁRIOS: $e');
+      print('Stack: $stackTrace');
+    }
+  }
+
   void logout() {
     _user = null;
+    _apiService?.clearToken();
     notifyListeners();
   }
 
@@ -65,6 +118,39 @@ class AuthProvider extends ChangeNotifier {
       senha: existing.senha,
     );
     notifyListeners();
+  }
+
+  User _userFromApi(Map<String, dynamic> data) {
+    return User(
+      id: data['id']?.toString() ?? '',
+      nome: data['name']?.toString() ?? '',
+      email: data['email']?.toString() ?? '',
+      role: _roleFromApi(data['role']?.toString()),
+      ativo: data['status'] is bool ? data['status'] as bool : true,
+      senha: '',
+    );
+  }
+
+  UserRole _roleFromApi(String? role) {
+    switch (role) {
+      case 'ADMINISTRATOR':
+        return UserRole.master;
+      case 'COORDINATOR':
+        return UserRole.coordenador;
+      case 'INTERN':
+        return UserRole.estagiario;
+      default:
+        return UserRole.estagiario;
+    }
+  }
+
+  void _upsertUser(User user) {
+    final index = _users.indexWhere((existing) => existing.id == user.id || existing.email == user.email);
+    if (index < 0) {
+      _users.insert(0, user);
+      return;
+    }
+    _users[index] = user;
   }
 }
 
