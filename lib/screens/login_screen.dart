@@ -23,13 +23,16 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     setState(() => _isLoggingIn = true);
+    print('🔐 [LOGIN] Tentando login com email: ${_emailController.text.trim()}');
     final auth = context.read<AuthProvider>();
     final success = await auth.login(_emailController.text.trim(), _passwordController.text.trim());
     if (!mounted) return;
     setState(() => _isLoggingIn = false);
     if (success) {
+      print('✅ [LOGIN] Sucesso! Redirecionando para dashboard');
       GoRouter.of(context).go('/dashboard');
     } else {
+      print('❌ [LOGIN] Falha na autenticação');
       _showMessage('E-mail ou senha inválidos.');
     }
   }

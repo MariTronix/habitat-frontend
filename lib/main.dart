@@ -7,7 +7,9 @@ import 'src/providers.dart';
 
 void main() {
   final apiService = ApiService();
+  print('✅ [INIT] ApiService criado com URL: ${apiService.baseUrl}');
   final authProvider = AuthProvider(apiService: apiService);
+  print('✅ [INIT] AuthProvider criado com ApiService injetado');
 
   runApp(
     MultiProvider(

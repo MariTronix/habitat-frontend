@@ -22,23 +22,52 @@ class AuthProvider extends ChangeNotifier {
         if (remoteUser is Map<String, dynamic>) {
           _user = _userFromApi(remoteUser);
           _upsertUser(_user!);
+          await loadUsersFromApi();
           notifyListeners();
           return true;
         }
       } on ApiException catch (error) {
+        print('❌ ERRO NA API: ${error.statusCode} - ${error.message}');
         if (error.statusCode == 401 || error.statusCode == 403) {
           return false;
         }
-      } catch (_) {
-        // Keep the app usable with mock data while the backend is offline.
+        rethrow;
+      } catch (e, stackTrace) {
+        print('❌ ERRO INESPERADO: $e');
+        print('Stack: $stackTrace');
+        rethrow;
       }
     }
 
+    print('⚠️ ApiService não está injetado, usando fallback mock');
     final match = _users.where((user) => user.email == email && user.senha == password && user.ativo).toList();
     if (match.isEmpty) return false;
     _user = match.first;
     notifyListeners();
     return true;
+  }
+
+  Future<void> loadUsersFromApi() async {
+    if (_apiService == null) {
+      print('⚠️ ApiService não está injetado para loadUsersFromApi');
+      return;
+    }
+    try {
+      print('📡 Carregando usuários da API...');
+      final usersData = await _apiService.fetchUsers();
+      print('✅ Usuários carregados: ${usersData.length}');
+      _users.clear();
+      for (final userData in usersData) {
+        if (userData is Map<String, dynamic>) {
+          final user = _userFromApi(userData);
+          _upsertUser(user);
+        }
+      }
+      notifyListeners();
+    } catch (e, stackTrace) {
+      print('❌ ERRO AO CARREGAR USUÁRIOS: $e');
+      print('Stack: $stackTrace');
+    }
   }
 
   void logout() {
