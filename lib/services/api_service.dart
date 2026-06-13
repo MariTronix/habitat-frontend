@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiService {
-  static const String productionBaseUrl = 'http://localhost:8080';
-
+  static String get productionBaseUrl => dotenv.env['API_URL'] ?? 'http://localhost:8080';
   ApiService({
     http.Client? client,
     String? baseUrl,
