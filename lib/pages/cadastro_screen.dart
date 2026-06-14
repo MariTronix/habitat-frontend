@@ -52,7 +52,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
   }
 
   Future<void> _pickFiles() async {
-    FilePickerResult? result = await FilePicker.pickFiles(
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
       allowMultiple: true,
       type: FileType.custom,
       allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'png', 'jpeg'],
