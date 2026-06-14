@@ -44,7 +44,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: HabitatTheme.accent,
+      // Você pode ajustar o 0.7 para ficar mais claro (ex: 0.5) ou mais escuro (ex: 0.9)
+      backgroundColor: Colors.black.withOpacity(0.7),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -61,10 +62,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Center(
                         child: Container(
-                          width: 72,
-                          height: 72,
-                          decoration: BoxDecoration(color: HabitatTheme.accent, borderRadius: BorderRadius.circular(20)),
-                          child: const Icon(Icons.home, color: Colors.white, size: 38),
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
+                          clipBehavior: Clip.antiAlias,
+                          // Chamando a imagem exata mapeada no pubspec.yaml
+                          child: Image.asset('assets/logo01.png', fit: BoxFit.contain),
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -92,9 +95,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 24),
                       ElevatedButton(
                         onPressed: _isLoggingIn ? null : _handleSubmit,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1D79F2), // Sua cor Azul Hex aplicada
+                          foregroundColor: Colors.white, // Deixa o texto "Entrar" branco
+                          padding: const EdgeInsets.symmetric(vertical: 14), // Dá uma altura melhor ao botão
+                        ),
                         child: _isLoggingIn
                             ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                            : const Text('Entrar'),
+                            : const Text('Entrar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       ),
                       const SizedBox(height: 12),
                       Text('Esqueceu a senha? Entre em contato com o administrador.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: HabitatTheme.primary.withOpacity(0.75), fontSize: 12)),
