@@ -37,11 +37,15 @@ class HabitatScaffold extends StatelessWidget {
         ],
       ),
       drawer: isDesktop ? null : Drawer(child: _MenuColumn(currentPath: currentPath, onLogout: () => auth.logout())),
-      body: Row(
-        children: [
-          if (isDesktop) SizedBox(width: 280, child: _MenuColumn(currentPath: currentPath, onLogout: () => auth.logout())),
-          Expanded(child: child),
-        ],
+
+      // Aqui está o SafeArea envolvendo o conteúdo do body!
+      body: SafeArea(
+        child: Row(
+          children: [
+            if (isDesktop) SizedBox(width: 280, child: _MenuColumn(currentPath: currentPath, onLogout: () => auth.logout())),
+            Expanded(child: child),
+          ],
+        ),
       ),
     );
   }

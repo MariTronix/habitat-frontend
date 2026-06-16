@@ -62,14 +62,36 @@ class _GestaoUsuariosScreenState extends State<GestaoUsuariosScreen> {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Gestão de Usuários', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 6),
-            Text('Gerencie os acessos ao sistema', style: Theme.of(context).textTheme.bodyMedium),
-          ]),
-          ElevatedButton.icon(onPressed: _openNew, icon: const Icon(Icons.add), label: const Text('Novo Usuário')),
-        ]),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // O Expanded faz a coluna de textos ocupar apenas o espaço disponível,
+            // impedindo que ela empurre o botão para fora da tela.
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Gestão de Usuários',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Gerencie os acessos ao sistema',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+            // Um pequeno espaço para o texto não colar no botão se a tela for muito estreita
+            const SizedBox(width: 16),
+            ElevatedButton.icon(
+              onPressed: _openNew,
+              icon: const Icon(Icons.add),
+              label: const Text('Novo Usuário'),
+            ),
+          ],
+        ),
         const SizedBox(height: 24),
         if (_editingUser != null || _editingUser == null && _nomeController.text.isNotEmpty)
           Card(

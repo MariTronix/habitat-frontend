@@ -15,6 +15,7 @@ class KanbanScreen extends StatefulWidget {
 class _KanbanScreenState extends State<KanbanScreen> {
   String _searchQuery = '';
   String _filterCoordenador = '';
+  final ScrollController _mainScrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +46,7 @@ class _KanbanScreenState extends State<KanbanScreen> {
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
+      controller: _mainScrollController,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -91,39 +93,53 @@ class _KanbanScreenState extends State<KanbanScreen> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(color: column.color, borderRadius: BorderRadius.circular(24)),
                   child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                          Row(
-                            children: [
-                              Container(width: 10, height: 10, decoration: BoxDecoration(color: column.status.color, shape: BoxShape.circle)),
-                              const SizedBox(width: 8),
-                              Expanded(child: Text(column.label, style: Theme.of(context).textTheme.titleMedium)),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(color: Colors.white70, borderRadius: BorderRadius.circular(12)),
-                                child: Text('${items.length}', style: Theme.of(context).textTheme.bodyMedium),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: items.length,
-                              itemBuilder: (context, itemIndex) {
-                                final caso = items[itemIndex];
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: GestureDetector(
-                                    onTap: () => GoRouter.of(context).go('/caso/${caso.id}'),
-                                    child: _KanbanCard(caso: caso),
-                                  ),
-                                );
-                              },
-                            ),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(width: 10, height: 10, decoration: BoxDecoration(color: column.status.color, shape: BoxShape.circle)),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text(column.label, style: Theme.of(context).textTheme.titleMedium)),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(color: Colors.white70, borderRadius: BorderRadius.circular(12)),
+                            child: Text('${items.length}', style: Theme.of(context).textTheme.bodyMedium),
                           ),
                         ],
                       ),
-                    );
+                      const SizedBox(height: 12),
+                      Expanded(
+                        // 1. Envolvemos o ListView com o NotificationListener
+                        child: NotificationListener<OverscrollNotification>(
+                          onNotification: (OverscrollNotification info) {
+                            // 2. Transfere a força da rolagem para a tela principal
+                            if (info.overscroll != 0) {
+                              _mainScrollController.jumpTo(
+                                _mainScrollController.offset + info.overscroll,
+                              );
+                            }
+                            return true; // Remove o efeito visual de fim de lista (ondinha do Android)
+                          },
+                          child: ListView.builder(
+                            // 3. A física Clamping é obrigatória para gerar o evento de overscroll
+                            physics: const ClampingScrollPhysics(),
+                            itemCount: items.length,
+                            itemBuilder: (context, itemIndex) {
+                              final caso = items[itemIndex];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: GestureDetector(
+                                  onTap: () => GoRouter.of(context).go('/caso/${caso.id}'),
+                                  child: _KanbanCard(caso: caso),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
               },
             );
           }),

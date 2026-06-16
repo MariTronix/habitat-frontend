@@ -52,58 +52,60 @@ class AppLayout extends StatelessWidget {
       backgroundColor: AppColors.background,
       // O Drawer atua como a Sidebar em telas menores (Mobile)
       drawer: isDesktop ? null : _buildSidebar(context, allItems),
-      
-      body: Row(
-        children: [
-          // Em telas grandes (Desktop), a Sidebar fica fixa na tela
-          if (isDesktop) _buildSidebar(context, allItems),
-          
-          // Área Principal (Header + Conteúdo)
-          Expanded(
-            child: Column(
-              children: [
-                // Header
-                Container(
-                  height: 56.0, // h-14 do Tailwind
-                  decoration: BoxDecoration(
-                    color: AppColors.card,
-                    border: Border(bottom: BorderSide(color: AppColors.border)),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
-                  child: Row(
-                    children: [
-                      if (!isDesktop)
-                        Builder( // O Builder é necessário para acessar o contexto e abrir o Drawer
-                          builder: (context) => IconButton(
-                            icon: const Icon(Icons.menu),
-                            color: AppColors.foreground,
-                            onPressed: () => Scaffold.of(context).openDrawer(),
+
+      body: SafeArea(
+        child: Row(
+          children: [
+            // Em telas grandes (Desktop), a Sidebar fica fixa na tela
+            if (isDesktop) _buildSidebar(context, allItems),
+
+            // Área Principal (Header + Conteúdo)
+            Expanded(
+              child: Column(
+                children: [
+                  // Header
+                  Container(
+                    height: 56.0, // h-14 do Tailwind
+                    decoration: BoxDecoration(
+                      color: AppColors.card,
+                      border: Border(bottom: BorderSide(color: AppColors.border)),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
+                    child: Row(
+                      children: [
+                        if (!isDesktop)
+                          Builder( // O Builder é necessário para acessar o contexto e abrir o Drawer
+                            builder: (context) => IconButton(
+                              icon: const Icon(Icons.menu),
+                              color: AppColors.foreground,
+                              onPressed: () => Scaffold.of(context).openDrawer(),
+                            ),
                           ),
-                        ),
-                      const Spacer(),
-                      if (MediaQuery.of(context).size.width >= 640) // sm:block do Tailwind
-                        Text(
-                          userEmail,
-                          style: TextStyle(
-                            fontSize: 12.0, // text-xs
-                            color: AppColors.muted, // text-muted-foreground
+                        const Spacer(),
+                        if (MediaQuery.of(context).size.width >= 640) // sm:block do Tailwind
+                          Text(
+                            userEmail,
+                            style: TextStyle(
+                              fontSize: 12.0, // text-xs
+                              color: AppColors.muted, // text-muted-foreground
+                            ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                
-                // Conteúdo Principal (children)
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.all(isDesktop ? 24.0 : 16.0), // p-4 lg:p-6
-                    child: child,
+
+                  // Conteúdo Principal (children)
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.all(isDesktop ? 24.0 : 16.0), // p-4 lg:p-6
+                      child: child,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
