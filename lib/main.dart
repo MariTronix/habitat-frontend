@@ -8,7 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env"); 
+  await dotenv.load(fileName: ".env");
   final apiService = ApiService();
   print('✅ [INIT] ApiService criado com URL: ${apiService.baseUrl}');
   final authProvider = AuthProvider(apiService: apiService);

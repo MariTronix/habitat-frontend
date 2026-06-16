@@ -43,23 +43,46 @@ class DashboardScreen extends StatelessWidget {
           const SizedBox(height: 6),
           Text('Bem-vindo(a), ${user?.nome ?? ''}', style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 24),
-          Wrap(
-            spacing: 16,
-            runSpacing: 16,
-            children: stats.map((stat) => _StatCard(data: stat)).toList(),
-          ),
+          LayoutBuilder(builder: (context, constraints) {
+            // Se o espaço for de celular (< 600px), divide a tela para caber 2.
+            // O "- 17" serve para dar o desconto seguro do espaçamento (spacing: 16)
+            final double cardWidth = constraints.maxWidth < 600
+                ? (constraints.maxWidth - 17) / 2
+                : 220.0; // Mantém o padrão na Web
+
+            return Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: stats.map((stat) => SizedBox(
+                width: cardWidth, // Força a nova largura no card
+                child: _StatCard(data: stat),
+              )).toList(),
+            );
+          }),
           const SizedBox(height: 24),
           LayoutBuilder(builder: (context, constraints) {
-            return Flex(
-              direction: constraints.maxWidth > 900 ? Axis.horizontal : Axis.vertical,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Expanded(child: _StatusBarChart(byStatus: byStatus)),
-                const SizedBox(width: 16, height: 16),
-                Expanded(child: _StatusPieChart(byStatus: byStatus)),
-              ],
-            );
+            // Se for Desktop/Web: Deixa lado a lado com Row e Expanded
+            if (constraints.maxWidth > 900) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: _StatusBarChart(byStatus: byStatus)),
+                  const SizedBox(width: 16),
+                  Expanded(child: _StatusPieChart(byStatus: byStatus)),
+                ],
+              );
+            }
+            // Se for Mobile: Empilha com Column SEM usar o Expanded
+            else {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch, // Faz o card ocupar a largura toda
+                children: [
+                  _StatusBarChart(byStatus: byStatus),
+                  const SizedBox(height: 16),
+                  _StatusPieChart(byStatus: byStatus),
+                ],
+              );
+            }
           }),
           const SizedBox(height: 24),
           Container(
