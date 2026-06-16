@@ -8,13 +8,19 @@ class AuthProvider extends ChangeNotifier {
 
   final ApiService? _apiService;
   User? _user;
+  
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
+
   User? get user => _user;
   bool get isAuthenticated => _user != null;
-  List<User> _users = List.of(mockUsers);
-
+  
+  final List<User> _users = List.of(mockUsers);
   List<User> get users => List.unmodifiable(_users);
 
   Future<bool> login(String email, String password) async {
+    _errorMessage = null; 
+    
     if (_apiService != null) {
       try {
         final data = await _apiService.login(email, password);
@@ -24,24 +30,29 @@ class AuthProvider extends ChangeNotifier {
           _upsertUser(_user!);
           await loadUsersFromApi();
           notifyListeners();
-          return true;
+          return true; 
         }
       } on ApiException catch (error) {
+        // 3. Tratamento de erro da API (ex: 500, 401)
         print('❌ ERRO NA API: ${error.statusCode} - ${error.message}');
-        if (error.statusCode == 401 || error.statusCode == 403) {
-          return false;
-        }
-        rethrow;
+        _errorMessage = error.message;
+        return false; 
       } catch (e, stackTrace) {
+        // 4. Rede de segurança: Tratamento de erros genéricos (ex: sem internet)
         print('❌ ERRO INESPERADO: $e');
         print('Stack: $stackTrace');
-        rethrow;
+        _errorMessage = 'Ocorreu um erro inesperado ao tentar fazer login.';
+        return false;
       }
     }
 
     print('⚠️ ApiService não está injetado, usando fallback mock');
     final match = _users.where((user) => user.email == email && user.senha == password && user.ativo).toList();
-    if (match.isEmpty) return false;
+    if (match.isEmpty) {
+      _errorMessage = 'E-mail ou senha incorretos (Mock).';
+      return false;
+    }
+    
     _user = match.first;
     notifyListeners();
     return true;
