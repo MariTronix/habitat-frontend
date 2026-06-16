@@ -32,6 +32,7 @@ class _GestaoUsuariosScreenState extends State<GestaoUsuariosScreen> {
   }
 
   void _openNew() {
+    // 1. Limpeza inicial
     setState(() {
       _editingUser = null;
       _nomeController.clear();
@@ -40,6 +41,139 @@ class _GestaoUsuariosScreenState extends State<GestaoUsuariosScreen> {
       _selectedRole = UserRole.estagiario;
       _ativo = true;
     });
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        // 2. O StatefulBuilder permite atualizar a interface apenas de dentro da janela
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Novo Usuário'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: _nomeController,
+                      decoration: const InputDecoration(
+                        labelText: 'Nome completo',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        labelText: 'E-mail',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _senhaController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Senha',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 3. A Caixa de Seleção (Dropdown) para o Cargo
+                    DropdownButtonFormField<UserRole>(
+                      value: _selectedRole,
+                      decoration: const InputDecoration(
+                        labelText: 'Cargo no Sistema',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: UserRole.estagiario,
+                          child: Text('Estagiário'),
+                        ),
+                        DropdownMenuItem(
+                          value: UserRole.coordenador,
+                          child: Text('Coordenador'),
+                        ),
+                      ],
+                      onChanged: (UserRole? newValue) {
+                        if (newValue != null) {
+                          // Usamos o setDialogState para atualizar o dropdown visualmente!
+                          setDialogState(() {
+                            _selectedRole = newValue;
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancelar', style: TextStyle(color: Colors.red)),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    // 4. Lógica de Persistência (Salvamento)
+                    await _salvarUsuario(context);
+                  },
+                  child: const Text('Salvar Usuário'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _salvarUsuario(BuildContext dialogContext) async {
+    // 1. Validação básica (evita enviar dados em branco)
+    if (_nomeController.text.isEmpty || _emailController.text.isEmpty || _senhaController.text.isEmpty) {
+      ScaffoldMessenger.of(dialogContext).showSnackBar(
+        const SnackBar(content: Text('Por favor, preencha todos os campos!'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    // 2. Montando o "Pacote" de dados (JSON) para enviar à API
+    final Map<String, dynamic> novoUsuario = {
+      'nome': _nomeController.text,
+      'email': _emailController.text,
+      'senha': _senhaController.text,
+      // Converte o enum para string de acordo com o que o servidor espera (ex: 'estagiario' ou 'coordenador')
+      'cargo': _selectedRole.name,
+      'ativo': _ativo,
+    };
+
+    try {
+      // 3. Chamada para a sua API (ajuste conforme a classe de serviço que você já tem configurada no projeto)
+      // Exemplo:
+      // await apiService.post('/usuarios', data: novoUsuario);
+
+      // Simulação de espera de 1 segundo para teste
+      await Future.delayed(const Duration(seconds: 1));
+      print('Dados enviados para persistência: $novoUsuario');
+
+      // 4. Fechar a janela e avisar que deu certo
+      Navigator.of(dialogContext).pop();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Usuário cadastrado com sucesso!'), backgroundColor: Colors.green),
+      );
+
+      // 5. Opcional: Chame a função que recarrega a lista de usuários na tela
+      // _carregarUsuarios();
+
+    } catch (error) {
+      // 6. Tratamento de erro caso o backend recuse o cadastro (ex: e-mail já existe)
+      ScaffoldMessenger.of(dialogContext).showSnackBar(
+        SnackBar(content: Text('Erro ao salvar: $error'), backgroundColor: Colors.red),
+      );
+    }
   }
 
   void _save(BuildContext context) {
