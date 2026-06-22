@@ -57,6 +57,22 @@ class ApiService {
     return data;
   }
 
+Future<void> createUser(Map<String, dynamic> userData) async {
+    print('📡 [API] POST /users');
+    
+    final response = await post('/users', userData);
+
+    if (response.statusCode != 201) {
+      print('❌ [API] Falha ao criar usuário: ${response.statusCode}');
+      throw ApiException(
+        statusCode: response.statusCode,
+        message: _extractErrorMessage(response),
+      );
+    }
+
+    print('✅ [API] Usuário criado com sucesso!');
+  }
+
   Future<List<dynamic>> fetchUsers() async {
     print('📡 [API] GET /users');
     final response = await get('/users');

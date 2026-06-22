@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import 'package:provider/provider.dart';
+
+  import '../services/api_service.dart';
 
 class SimUser {
   String id;
@@ -59,7 +62,7 @@ class _GestaoUsuariosScreenState extends State<GestaoUsuariosScreen> {
     setState(() {
       final index = users.indexWhere((u) => u.id == id);
       if (index != -1) {
-        users[index].ativo = false; // Inativar (Soft delete)
+        users[index].ativo = false; 
       }
     });
     _showToast('Usuário inativado com sucesso.');
@@ -74,17 +77,36 @@ class _GestaoUsuariosScreenState extends State<GestaoUsuariosScreen> {
           isNew: userToEdit == null,
           initialUser: userToEdit ?? SimUser(id: DateTime.now().millisecondsSinceEpoch.toString(), nome: '', email: '', role: 'estagiario', ativo: true),
           allUsers: users,
-          onSave: (savedUser) {
-            setState(() {
+          onSave: (savedUser) async {
+            final userPayload = {
+             'name': savedUser.nome,
+              'email': savedUser.email,
+              'password': savedUser.senha ?? '',
+              'role': _mapRoleToJava(savedUser.role), 
+              if (savedUser.role == 'estagiario' && savedUser.coordinatorId != null) 
+                'coordinatorId': int.tryParse(savedUser.coordinatorId!),
+            };
+
+            try {
+              final api = Provider.of<ApiService>(context, listen: false);
+
               if (userToEdit == null) {
-                users.add(savedUser);
+                await api.createUser(userPayload);
+                
+                setState(() {
+                  users.add(savedUser);
+                });
                 _showToast('Usuário criado com sucesso.');
               } else {
-                final index = users.indexWhere((u) => u.id == savedUser.id);
-                if (index != -1) users[index] = savedUser;
-                _showToast('Usuário atualizado com sucesso.');
+                setState(() {
+                  final index = users.indexWhere((u) => u.id == savedUser.id);
+                  if (index != -1) users[index] = savedUser;
+                });
+                _showToast('Usuário atualizado (Apenas em memória por enquanto).');
               }
-            });
+            } catch (e) {
+              _showToast(e.toString(), isError: true);
+            }
           },
         );
       },
@@ -190,6 +212,15 @@ class _GestaoUsuariosScreenState extends State<GestaoUsuariosScreen> {
         ),
       ),
     );
+  }
+
+  String _mapRoleToJava(String dartRole) {
+    switch (dartRole) {
+      case 'master': return 'ADMINISTRATOR';
+      case 'coordenador': return 'COORDINATOR';
+      case 'estagiario': return 'INTERN';
+      default: return 'INTERN';
+    }
   }
 }
 

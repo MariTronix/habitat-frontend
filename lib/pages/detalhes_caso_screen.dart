@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/app_colors.dart';
 
-// --- Modelos Simulados Expandidos ---
 class SimAnotacao {
   final String id, texto, autor, data;
   SimAnotacao(this.id, this.texto, this.autor, this.data);
@@ -45,8 +44,6 @@ class SimCaso {
   });
 }
 
-// ---------------------------------------------------------
-
 class DetalhesCasoScreen extends StatefulWidget {
   final String casoId;
   const DetalhesCasoScreen({super.key, required this.casoId});
@@ -60,13 +57,11 @@ class _DetalhesCasoScreenState extends State<DetalhesCasoScreen> {
   final _novaAnotacaoController = TextEditingController();
   bool _isUploadingDoc = false;
 
-  // Controllers para Caminho Judicial
   final _judProcController = TextEditingController();
   final _judVaraController = TextEditingController();
   final _judDataController = TextEditingController();
   final _judStatusController = TextEditingController();
 
-  // Controllers para Conciliação
   final _concOutraParteController = TextEditingController();
   final _concDataController = TextEditingController();
   final _concLocalController = TextEditingController();
@@ -114,7 +109,6 @@ class _DetalhesCasoScreenState extends State<DetalhesCasoScreen> {
       ],
     );
 
-    // Preencher forms se já existirem dados
     if (caso.caminhoJudicial != null) {
       _judProcController.text = caso.caminhoJudicial!['numeroProcesso'] ?? '';
       _judVaraController.text = caso.caminhoJudicial!['varaJudicial'] ?? '';
@@ -147,7 +141,7 @@ class _DetalhesCasoScreenState extends State<DetalhesCasoScreen> {
       caso.anotacoes.add(SimAnotacao(
         DateTime.now().toString(),
         _novaAnotacaoController.text,
-        'Mariana', // Usuário atual
+        'Mariana', 
         'Hoje',
       ));
       _novaAnotacaoController.clear();
@@ -173,7 +167,7 @@ class _DetalhesCasoScreenState extends State<DetalhesCasoScreen> {
     return SingleChildScrollView(
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1024), // max-w-5xl
+          constraints: const BoxConstraints(maxWidth: 1024), 
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -186,15 +180,13 @@ class _DetalhesCasoScreenState extends State<DetalhesCasoScreen> {
               ),
               const SizedBox(height: 16.0),
 
-              // Header do Caso
               _buildHeader(),
               const SizedBox(height: 24.0),
 
-              // Abas (Tabs)
+              // Abas 
               _buildTabs(),
               const SizedBox(height: 24.0),
 
-              // Conteúdo da Aba Ativa
               if (_activeTab == 'info') _buildInfoTab(),
               if (_activeTab == 'timeline') _buildTimelineTab(),
               if (_activeTab == 'docs') _buildDocsTab(),

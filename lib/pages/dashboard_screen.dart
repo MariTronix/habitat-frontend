@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../theme/app_colors.dart';
 
-// Modelos temporários para simular os Contextos (CasosContext e AuthContext)
 class SimCaso {
   final String id;
   final String moradorNome;
@@ -62,7 +61,6 @@ class DashboardScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header da Página
           Text(
             'Dashboard',
             style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, color: AppColors.foreground),
@@ -74,7 +72,7 @@ class DashboardScreen extends StatelessWidget {
           ),
           const SizedBox(height: 24.0),
 
-          // Cards de Estatísticas (Grid)
+         
           LayoutBuilder(
             builder: (context, constraints) {
               int crossAxisCount = 1;
@@ -209,7 +207,6 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // Helpers Visuais
   Widget _buildStatCard(String label, int value, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(20.0),
@@ -242,7 +239,7 @@ class DashboardScreen extends StatelessWidget {
 
   Widget _buildChartCard(String title, Widget chart) {
     return Container(
-      height: 320, // Altura fixa para comportar o título e o gráfico (250 do recharts + padding)
+      height: 320, 
       padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
         color: AppColors.card,
@@ -260,13 +257,13 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // Gráfico de Barras com FL_Chart
+  // Gráfico de Barras 
   Widget _buildBarChart(List<Map<String, dynamic>> data) {
     return BarChart(
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
         maxY: data.map((e) => e['value'] as int).reduce((a, b) => a > b ? a : b).toDouble() + 1,
-        barTouchData: BarTouchData(enabled: false), // Desabilita tooltip temporariamente
+        barTouchData: BarTouchData(enabled: false), 
         titlesData: FlTitlesData(
           show: true,
           bottomTitles: AxisTitles(
@@ -316,20 +313,20 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // Gráfico de Pizza com FL_Chart
+  // Gráfico de Pizza 
   Widget _buildPieChart(List<Map<String, dynamic>> data) {
     final validData = data.where((e) => (e['value'] as int) > 0).toList();
     
     return PieChart(
       PieChartData(
         sectionsSpace: 2,
-        centerSpaceRadius: 55, // innerRadius
+        centerSpaceRadius: 55, 
         sections: List.generate(validData.length, (index) {
           return PieChartSectionData(
             color: validData[index]['color'],
             value: (validData[index]['value'] as int).toDouble(),
             title: '${validData[index]['name']}: ${validData[index]['value']}',
-            radius: 35, // outerRadius (55 + 35 = 90)
+            radius: 35, 
             titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
           );
         }),

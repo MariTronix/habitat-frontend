@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../src/models.dart';
 import '../src/providers.dart';
 import '../src/app_theme.dart';
+import '../services/api_service.dart';
 
 class GestaoUsuariosScreen extends StatefulWidget {
   const GestaoUsuariosScreen({super.key});
@@ -131,7 +132,6 @@ class _GestaoUsuariosScreenState extends State<GestaoUsuariosScreen> {
   }
 
   Future<void> _salvarUsuario(BuildContext dialogContext) async {
-    // 1. Validação básica (evita enviar dados em branco)
     if (_nomeController.text.isEmpty || _emailController.text.isEmpty || _senhaController.text.isEmpty) {
       ScaffoldMessenger.of(dialogContext).showSnackBar(
         const SnackBar(content: Text('Por favor, preencha todos os campos!'), backgroundColor: Colors.red),
@@ -139,40 +139,42 @@ class _GestaoUsuariosScreenState extends State<GestaoUsuariosScreen> {
       return;
     }
 
-    // 2. Montando o "Pacote" de dados (JSON) para enviar à API
     final Map<String, dynamic> novoUsuario = {
-      'nome': _nomeController.text,
-      'email': _emailController.text,
-      'senha': _senhaController.text,
-      // Converte o enum para string de acordo com o que o servidor espera (ex: 'estagiario' ou 'coordenador')
-      'cargo': _selectedRole.name,
-      'ativo': _ativo,
+      'name': _nomeController.text.trim(),
+      'email': _emailController.text.trim(),
+      'password': _senhaController.text.trim(),
+      'role': _mapRoleToJava(_selectedRole.name),
+      if (_selectedRole.name == 'estagiario') 'coordinatorId': 8,
     };
 
     try {
-      // 3. Chamada para a sua API (ajuste conforme a classe de serviço que você já tem configurada no projeto)
-      // Exemplo:
-      // await apiService.post('/usuarios', data: novoUsuario);
+      // 2. Chama a API de verdade
+      final apiService = Provider.of<ApiService>(context, listen: false);
+      await apiService.createUser(novoUsuario);
 
-      // Simulação de espera de 1 segundo para teste
-      await Future.delayed(const Duration(seconds: 1));
-      print('Dados enviados para persistência: $novoUsuario');
-
-      // 4. Fechar a janela e avisar que deu certo
+      // 3. Fecha o modal de carregamento e mostra sucesso
+      if (!mounted) return;
       Navigator.of(dialogContext).pop();
-
+      
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Usuário cadastrado com sucesso!'), backgroundColor: Colors.green),
+        const SnackBar(content: Text('Usuário cadastrado com sucesso no banco!'), backgroundColor: Colors.green),
       );
-
-      // 5. Opcional: Chame a função que recarrega a lista de usuários na tela
-      // _carregarUsuarios();
-
+      
     } catch (error) {
-      // 6. Tratamento de erro caso o backend recuse o cadastro (ex: e-mail já existe)
+      // 4. Mostra o erro exato do Java na tela
+      if (!mounted) return;
       ScaffoldMessenger.of(dialogContext).showSnackBar(
-        SnackBar(content: Text('Erro ao salvar: $error'), backgroundColor: Colors.red),
+        SnackBar(content: Text(error.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
       );
+    }
+  }
+
+  String _mapRoleToJava(String dartRole) {
+    switch (dartRole.toLowerCase()) {
+      case 'master': return 'ADMINISTRATOR';
+      case 'coordenador': return 'COORDINATOR';
+      case 'estagiario': return 'INTERN';
+      default: return 'INTERN';
     }
   }
 

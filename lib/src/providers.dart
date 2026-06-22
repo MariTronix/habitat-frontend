@@ -33,12 +33,10 @@ class AuthProvider extends ChangeNotifier {
           return true; 
         }
       } on ApiException catch (error) {
-        // 3. Tratamento de erro da API (ex: 500, 401)
         print('❌ ERRO NA API: ${error.statusCode} - ${error.message}');
         _errorMessage = error.message;
         return false; 
       } catch (e, stackTrace) {
-        // 4. Rede de segurança: Tratamento de erros genéricos (ex: sem internet)
         print('❌ ERRO INESPERADO: $e');
         print('Stack: $stackTrace');
         _errorMessage = 'Ocorreu um erro inesperado ao tentar fazer login.';
@@ -64,9 +62,9 @@ class AuthProvider extends ChangeNotifier {
       return;
     }
     try {
-      print('📡 Carregando usuários da API...');
+      print('Carregando usuários da API...');
       final usersData = await _apiService.fetchUsers();
-      print('✅ Usuários carregados: ${usersData.length}');
+      print('Usuários carregados: ${usersData.length}');
       _users.clear();
       for (final userData in usersData) {
         if (userData is Map<String, dynamic>) {
@@ -76,7 +74,7 @@ class AuthProvider extends ChangeNotifier {
       }
       notifyListeners();
     } catch (e, stackTrace) {
-      print('❌ ERRO AO CARREGAR USUÁRIOS: $e');
+      print('ERRO AO CARREGAR USUÁRIOS: $e');
       print('Stack: $stackTrace');
     }
   }

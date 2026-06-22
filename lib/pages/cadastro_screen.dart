@@ -123,7 +123,6 @@ class _CadastroScreenState extends State<CadastroScreen> {
               Text('Novo Atendimento', style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, color: AppColors.foreground)),
               const SizedBox(height: 24.0),
               
-              // Formulário simplificado visualmente para o exemplo
               _buildFormSection('Dados do Morador', [
                 _buildTextField('Nome Completo *', 'Nome completo', _nomeController),
                 _buildTextField('CPF *', '000.000.000-00', _cpfController, inputFormatters: [CpfInputFormatter()]),
@@ -149,7 +148,6 @@ class _CadastroScreenState extends State<CadastroScreen> {
     );
   }
 
-  // --- Helpers de UI ---
   Widget _buildFormSection(String title, List<Widget> children) {
     return Container(
       padding: const EdgeInsets.all(20.0),
@@ -186,7 +184,6 @@ class _CadastroScreenState extends State<CadastroScreen> {
   }
 }
 
-// Formatadores mantidos conforme original
 class CpfInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
