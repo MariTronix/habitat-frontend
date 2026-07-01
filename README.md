@@ -1,12 +1,5 @@
 # Sistema Habitat
 
-## Integrantes do Grupo
-• Diego Luiz
-• Emmanuel Guerra
-• José Miguel
-• Luan Richard
-• Renato Nascimento
-
 ## Proposta do Aplicativo
 O Sistema Habitat é uma solução de gestão jurídica focada em projetos sociais de regularização habitacional. Desenvolvido em Flutter, o aplicativo foi criado para centralizar, organizar e acelerar o andamento de processos complexos que envolvem a posse legal de terras e moradias para famílias de baixa renda. A ferramenta atua como um facilitador de fluxo de trabalho e comunicação de dados processuais entre estagiários, coordenadores e administradores.
 
